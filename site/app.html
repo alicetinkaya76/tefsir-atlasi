@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tefsîr Atlası · Dijital Müfessirler Haritası</title>
+<meta name="description" content="161 tefsir eserini coğrafya, zaman, ekol, tür ve kavram eksenlerinde haritalayan dijital atlas. Yapıyı betimler; mânâya hüküm vermez.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Archivo:wght@400;500;600;700&family=Amiri:ital,wght@0,400;0,700;1,400&family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#12141d; --ground-2:#161925; --panel:#1b1f2e; --panel-2:#222840;
+  --raised:#272d44; --line:rgba(236,227,208,.11); --line-soft:rgba(236,227,208,.06);
+  --ivory:#ece3d0; --ivory-dim:#c9bfa9; --muted:#9a927f; --faint:#736c5c;
+  --gold:#d8a657; --gold-bright:#edca7e; --gold-deep:#a9791c; --gold-glow:rgba(216,166,87,.5);
+  --teal:#7daea3; --lapis:#7aa2c4; --clay:#c98a76; --violet:#b18ac0;
+  --sunni:#d8a657; --shii:#7aa2c4; --zaydi:#85b79d; --ibadi:#c98a76; --mutazili:#b18ac0;
+  --maxw:1280px;
+  --f-disp:'Marcellus',Georgia,serif;
+  --f-serif:'Newsreader',Georgia,serif;
+  --f-ui:'Archivo',-apple-system,system-ui,sans-serif;
+  --f-ar:'Amiri',serif; --f-fa:'Vazirmatn',sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--ground); color:var(--ivory);
+  font-family:var(--f-serif); font-size:17px; line-height:1.6;
+  font-weight:300; letter-spacing:.005em;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+}
+/* niche-light: warm lamp glow falling from the top, like a mishkât */
+body::before{
+  content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(120% 70% at 50% -12%, rgba(216,166,87,.16), rgba(216,166,87,.05) 32%, transparent 60%),
+    radial-gradient(90% 60% at 78% 8%, rgba(122,162,196,.07), transparent 55%),
+    linear-gradient(180deg,#171a27 0%, var(--ground) 38%, #0f111a 100%);
+}
+body::after{ /* faint paper grain */
+  content:""; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.04;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+#app{position:relative; z-index:1}
+a{color:inherit}
+::selection{background:rgba(216,166,87,.28); color:#fff}
+.ar{font-family:var(--f-ar); direction:rtl; font-weight:400}
+.fa{font-family:var(--f-fa); direction:rtl}
+.rosette{color:var(--gold); font-family:var(--f-ar); font-weight:400; line-height:1}
+
+/* ---------- top bar ---------- */
+header.bar{
+  position:sticky; top:0; z-index:60; backdrop-filter:blur(14px);
+  background:linear-gradient(180deg,rgba(18,20,29,.92),rgba(18,20,29,.74));
+  border-bottom:1px solid var(--line);
+}
+.bar-in{max-width:var(--maxw); margin:0 auto; padding:.62rem clamp(1rem,3vw,2rem);
+  display:flex; align-items:center; gap:1.2rem}
+.brand{display:flex; align-items:baseline; gap:.6rem; text-decoration:none; white-space:nowrap}
+.brand .mark{font-family:var(--f-ar); color:var(--gold); font-size:1.5rem; line-height:1;
+  text-shadow:0 0 18px var(--gold-glow); transform:translateY(2px)}
+.brand b{font-family:var(--f-disp); font-weight:400; font-size:1.16rem; letter-spacing:.13em;
+  text-transform:uppercase; color:var(--ivory)}
+.brand span{font-family:var(--f-ui); font-size:.62rem; letter-spacing:.34em; text-transform:uppercase;
+  color:var(--faint); display:block}
+.bar-spacer{flex:1}
+.lang{display:flex; border:1px solid var(--line); border-radius:999px; overflow:hidden;
+  font-family:var(--f-ui); font-size:.7rem; letter-spacing:.08em}
+.lang button{background:none; border:0; color:var(--muted); padding:.34rem .72rem; cursor:pointer;
+  font:inherit; letter-spacing:inherit; transition:.18s}
+.lang button.on{background:var(--gold); color:#1a160c; font-weight:600}
+.lang button:not(.on):hover{color:var(--ivory)}
+
+/* ---------- lens nav ---------- */
+nav.lenses{position:sticky; top:53px; z-index:55; background:rgba(16,18,27,.86);
+  backdrop-filter:blur(12px); border-bottom:1px solid var(--line)}
+.lens-scroll{max-width:var(--maxw); margin:0 auto; display:flex; gap:.1rem;
+  padding:0 clamp(.5rem,2vw,1.5rem); overflow-x:auto; scrollbar-width:none}
+.lens-scroll::-webkit-scrollbar{display:none}
+.lens-tab{flex:0 0 auto; background:none; border:0; cursor:pointer; color:var(--muted);
+  font-family:var(--f-ui); padding:.7rem .75rem .62rem; position:relative; white-space:nowrap;
+  display:flex; align-items:center; gap:.5rem; transition:.18s; border-bottom:2px solid transparent}
+.lens-tab .rn{font-family:var(--f-disp); font-size:.82rem; color:var(--gold-deep); letter-spacing:.05em}
+.lens-tab .nm{font-size:.82rem; letter-spacing:.02em}
+.lens-tab .na{font-family:var(--f-ar); font-size:.92rem; color:var(--faint); display:none}
+.lens-tab:hover{color:var(--ivory)}
+.lens-tab:hover .rn{color:var(--gold)}
+.lens-tab.on{color:var(--ivory); border-bottom-color:var(--gold)}
+.lens-tab.on .rn{color:var(--gold)}
+@media(min-width:980px){.lens-tab .na{display:inline}}
+
+/* ---------- shell ---------- */
+main{max-width:var(--maxw); margin:0 auto; padding:0 clamp(1rem,3vw,2rem)}
+.lens-panel{display:none; padding:2.4rem 0 4rem; animation:fade .5s ease both}
+.lens-panel.on{display:block}
+@keyframes fade{from{opacity:0; transform:translateY(8px)}to{opacity:1; transform:none}}
+
+/* lens header block */
+.lens-head{display:flex; align-items:flex-start; gap:1rem; margin-bottom:1.6rem;
+  padding-bottom:1.2rem; border-bottom:1px solid var(--line)}
+.lens-head .idx{font-family:var(--f-disp); font-size:2.1rem; color:var(--gold);
+  line-height:.9; text-shadow:0 0 22px var(--gold-glow); flex:0 0 auto}
+.lens-head .tt h2{font-family:var(--f-disp); font-weight:400; margin:.1rem 0 .15rem;
+  font-size:clamp(1.5rem,3.2vw,2.1rem); letter-spacing:.01em; line-height:1.05}
+.lens-head .tt .sub{font-family:var(--f-ui); font-size:.72rem; letter-spacing:.22em;
+  text-transform:uppercase; color:var(--muted)}
+.lens-head .tt .ar{font-size:1.15rem; color:var(--gold-deep); margin-left:.4rem}
+.lens-head .blurb{margin:.55rem 0 0; max-width:62ch; color:var(--ivory-dim); font-size:.98rem}
+
+/* "ne ölçer / ne ölçmez" epistemic note — the signature intellectual device */
+.epi{margin-top:1.1rem; display:grid; grid-template-columns:1fr 1fr; gap:0;
+  border:1px solid var(--line); border-radius:12px; overflow:hidden; max-width:760px;
+  background:linear-gradient(180deg,rgba(216,166,87,.04),transparent)}
+.epi>div{padding:.7rem .95rem}
+.epi .zahir{border-right:1px solid var(--line)}
+.epi h5{margin:0 0 .25rem; font-family:var(--f-ui); font-size:.62rem; letter-spacing:.2em;
+  text-transform:uppercase}
+.epi .zahir h5{color:var(--gold)} .epi .batin h5{color:var(--teal)}
+.epi p{margin:0; font-size:.84rem; color:var(--ivory-dim); line-height:1.5}
+@media(max-width:620px){.epi{grid-template-columns:1fr}.epi .zahir{border-right:0;border-bottom:1px solid var(--line)}}
+
+/* ---------- HERO ---------- */
+.hero{position:relative; padding:clamp(2.4rem,7vw,5rem) 0 clamp(1.6rem,4vw,2.4rem)}
+.hero-grid{display:grid; grid-template-columns:1.15fr .85fr; gap:clamp(1.5rem,4vw,3rem); align-items:center}
+@media(max-width:880px){.hero-grid{grid-template-columns:1fr}}
+.eyebrow{font-family:var(--f-ui); font-size:.7rem; letter-spacing:.34em; text-transform:uppercase;
+  color:var(--gold); display:flex; align-items:center; gap:.7rem; margin-bottom:1.1rem}
+.eyebrow::before{content:""; width:34px; height:1px; background:linear-gradient(90deg,var(--gold),transparent)}
+h1.title{font-family:var(--f-disp); font-weight:400; line-height:1.02; margin:0;
+  font-size:clamp(2.6rem,7vw,4.7rem); letter-spacing:.005em}
+h1.title .l2{display:block; color:var(--gold); position:relative}
+.title-ar{font-family:var(--f-ar); font-size:clamp(1.3rem,3vw,1.9rem); color:var(--gold-deep);
+  margin:.5rem 0 0; letter-spacing:0; opacity:.92}
+.thesis{font-family:var(--f-serif); font-size:clamp(1.05rem,2vw,1.28rem); line-height:1.5;
+  color:var(--ivory-dim); margin:1.4rem 0 0; max-width:50ch; font-weight:300}
+.thesis em{font-style:italic; color:var(--ivory)}
+.thesis b{font-weight:500; color:var(--gold-bright)}
+.hero-cta{display:flex; flex-wrap:wrap; gap:.8rem; margin-top:1.9rem}
+.btn{font-family:var(--f-ui); font-size:.8rem; letter-spacing:.04em; cursor:pointer;
+  padding:.7rem 1.25rem; border-radius:999px; border:1px solid var(--line); background:none;
+  color:var(--ivory); text-decoration:none; display:inline-flex; align-items:center; gap:.55rem;
+  transition:.2s}
+.btn.prim{background:linear-gradient(120deg,var(--gold),var(--gold-deep)); color:#1a160c;
+  border-color:transparent; font-weight:600; box-shadow:0 6px 24px -8px var(--gold-glow)}
+.btn:hover{transform:translateY(-2px)}
+.btn:not(.prim):hover{border-color:var(--gold); color:var(--gold-bright)}
+
+/* hero figure: niche/lamp + constellation of works by century */
+.hero-fig{position:relative; aspect-ratio:1/1.04; min-height:300px}
+.hero-fig svg{width:100%; height:100%; overflow:visible}
+.hero-stats{display:flex; gap:clamp(1rem,3vw,2.6rem); margin-top:2.2rem; flex-wrap:wrap;
+  padding-top:1.6rem; border-top:1px solid var(--line)}
+.hstat .n{font-family:var(--f-disp); font-size:clamp(1.6rem,3.4vw,2.3rem); color:var(--ivory); line-height:1}
+.hstat .n b{color:var(--gold)}
+.hstat .k{font-family:var(--f-ui); font-size:.64rem; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--muted); margin-top:.4rem}
+
+/* ---------- generic cards / controls ---------- */
+.card{background:linear-gradient(180deg,var(--panel),var(--ground-2)); border:1px solid var(--line);
+  border-radius:14px; padding:1.2rem 1.3rem}
+.grid{display:grid; gap:1rem}
+.controls{display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; margin-bottom:1.3rem}
+.chip{font-family:var(--f-ui); font-size:.74rem; letter-spacing:.02em; cursor:pointer;
+  padding:.4rem .8rem; border-radius:999px; border:1px solid var(--line); background:rgba(255,255,255,.015);
+  color:var(--muted); transition:.16s; display:inline-flex; align-items:center; gap:.45rem; white-space:nowrap}
+.chip:hover{color:var(--ivory); border-color:var(--gold-deep)}
+.chip.on{background:var(--gold); color:#1a160c; border-color:transparent; font-weight:600}
+.chip .dot{width:8px; height:8px; border-radius:50%; flex:0 0 auto}
+.chip.swatch.on{background:transparent; color:var(--ivory); border-width:1.5px}
+.seg{display:flex; border:1px solid var(--line); border-radius:999px; overflow:hidden}
+.seg button{background:none;border:0;color:var(--muted);font-family:var(--f-ui);font-size:.72rem;
+  padding:.42rem .85rem;cursor:pointer;letter-spacing:.03em;transition:.16s}
+.seg button.on{background:var(--raised);color:var(--gold-bright)}
+.lbl{font-family:var(--f-ui); font-size:.64rem; letter-spacing:.2em; text-transform:uppercase; color:var(--faint)}
+input.search{font-family:var(--f-ui); font-size:.9rem; background:var(--ground-2); color:var(--ivory);
+  border:1px solid var(--line); border-radius:999px; padding:.62rem 1.1rem; width:100%; max-width:420px}
+input.search:focus{outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(216,166,87,.12)}
+
+/* pano dashboard */
+.pano-grid{display:grid; grid-template-columns:repeat(12,1fr); gap:1rem}
+.pano-grid>*{grid-column:span 12}
+@media(min-width:760px){
+  .span4{grid-column:span 4} .span6{grid-column:span 6} .span8{grid-column:span 8}
+  .span5{grid-column:span 5} .span7{grid-column:span 7} .span3{grid-column:span 3}
+}
+.card h3{font-family:var(--f-ui); font-size:.66rem; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--muted); margin:0 0 1rem; display:flex; align-items:center; gap:.5rem}
+.card h3 .rosette{font-size:.9rem}
+.bar-row{display:flex; align-items:center; gap:.7rem; margin:.42rem 0; font-family:var(--f-ui); font-size:.8rem}
+.bar-row .bl{flex:0 0 auto; width:118px; color:var(--ivory-dim); display:flex; align-items:center; gap:.4rem}
+.bar-row .bl .dot{width:9px;height:9px;border-radius:2px;flex:0 0 auto}
+.bar-track{flex:1; height:9px; background:rgba(255,255,255,.05); border-radius:4px; overflow:hidden}
+.bar-fill{height:100%; border-radius:4px; transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.bar-row .bv{flex:0 0 auto; width:34px; text-align:right; color:var(--muted); font-variant-numeric:tabular-nums}
+
+/* tooltip */
+.tip{position:fixed; z-index:200; pointer-events:none; max-width:300px; opacity:0; transition:opacity .12s;
+  background:rgba(20,22,32,.97); border:1px solid var(--gold-deep); border-radius:10px;
+  padding:.7rem .85rem; font-family:var(--f-ui); font-size:.78rem; line-height:1.5;
+  box-shadow:0 14px 40px -12px #000; backdrop-filter:blur(6px)}
+.tip .tt-t{font-family:var(--f-disp); font-size:1rem; color:var(--gold-bright); margin-bottom:.18rem}
+.tip .tt-m{color:var(--muted); font-size:.72rem}
+.tip .tt-r{margin-top:.35rem; color:var(--ivory-dim)}
+
+/* map */
+.map-wrap{position:relative; width:100%; border:1px solid var(--line); border-radius:16px; overflow:hidden;
+  background:radial-gradient(120% 130% at 30% 10%, #20283a, #141826 60%, #0f1320)}
+#mapSvg{width:100%; height:auto; display:block}
+.city{cursor:pointer; transition:.16s}
+.city:hover circle.hit{stroke:var(--gold-bright); stroke-width:1.5}
+.legend{display:flex; flex-wrap:wrap; gap:.4rem 1rem; margin-top:1rem; font-family:var(--f-ui); font-size:.74rem; color:var(--muted)}
+.legend i{display:inline-flex; align-items:center; gap:.4rem}
+.legend i b{width:10px;height:10px;border-radius:50%;display:inline-block}
+
+/* timeline */
+#tlSvg{width:100%; height:auto; display:block; overflow:visible}
+.tl-mark{cursor:pointer}
+
+/* network */
+.net-wrap{position:relative; border:1px solid var(--line); border-radius:16px; overflow:hidden;
+  background:radial-gradient(130% 130% at 50% 0%, #1c2233, #12151f)}
+.net-wrap svg{width:100%; height:auto; display:block; cursor:grab}
+.net-wrap svg:active{cursor:grabbing}
+.node{cursor:pointer}
+.nlabel{font-family:var(--f-ui); font-size:10px; fill:var(--ivory-dim); pointer-events:none;
+  paint-order:stroke; stroke:#12141d; stroke-width:2.4px}
+
+/* matrix */
+.matrix{border-collapse:separate; border-spacing:3px; width:100%; font-family:var(--f-ui)}
+.matrix th{font-size:.66rem; letter-spacing:.04em; color:var(--muted); font-weight:500; padding:.3rem; vertical-align:bottom}
+.matrix th.rowh{text-align:right; padding-right:.7rem; white-space:nowrap; color:var(--ivory-dim)}
+.matrix td{text-align:center; border-radius:6px; padding:.55rem .2rem; font-size:.82rem;
+  font-variant-numeric:tabular-nums; cursor:default; transition:.15s; color:var(--ivory)}
+.matrix td.has{cursor:pointer} .matrix td.has:hover{outline:1.5px solid var(--gold-bright)}
+.matrix td.zero{color:var(--faint)}
+
+/* corpus list */
+.work-list{display:grid; gap:.55rem}
+.work-row{display:grid; grid-template-columns:auto 1fr auto; gap:.9rem; align-items:center;
+  padding:.75rem .95rem; border:1px solid var(--line); border-radius:11px; cursor:pointer;
+  background:rgba(255,255,255,.012); transition:.16s}
+.work-row:hover{border-color:var(--gold-deep); background:rgba(216,166,87,.045); transform:translateX(3px)}
+.work-row .yr{font-family:var(--f-disp); font-size:1.05rem; color:var(--gold); width:62px; text-align:center; line-height:1}
+.work-row .yr small{display:block; font-family:var(--f-ui); font-size:.56rem; letter-spacing:.1em; color:var(--faint); text-transform:uppercase; margin-top:.15rem}
+.work-row .mid .au{font-family:var(--f-disp); font-size:1.02rem; color:var(--ivory)}
+.work-row .mid .ti{font-size:.82rem; color:var(--muted); font-family:var(--f-ui)}
+.work-row .mid .ti .ar{font-size:.95rem; color:var(--ivory-dim)}
+.work-row .tags{display:flex; gap:.35rem; flex-wrap:wrap; justify-content:flex-end; max-width:230px}
+.tg{font-family:var(--f-ui); font-size:.6rem; letter-spacing:.04em; padding:.2rem .5rem; border-radius:999px;
+  border:1px solid var(--line); color:var(--muted); white-space:nowrap}
+.tg.trad{border:0; color:#15140e; font-weight:600}
+
+/* concordance result */
+.conc{border-left:2px solid var(--gold-deep); padding:.5rem 0 .5rem 1rem; margin:.7rem 0}
+.conc .src{font-family:var(--f-ui); font-size:.7rem; color:var(--gold); letter-spacing:.03em; margin-bottom:.3rem}
+.conc .txt{font-size:.92rem; color:var(--ivory-dim)} .conc .txt.ar{font-size:1.15rem; line-height:1.9}
+mark{background:rgba(216,166,87,.32); color:var(--ivory); border-radius:3px; padding:0 .15em}
+
+/* drawer */
+.scrim{position:fixed; inset:0; z-index:120; background:rgba(8,9,14,.62); backdrop-filter:blur(3px);
+  opacity:0; pointer-events:none; transition:.25s}
+.scrim.on{opacity:1; pointer-events:auto}
+.drawer{position:fixed; top:0; right:0; z-index:130; height:100%; width:min(520px,94vw);
+  background:linear-gradient(160deg,#1b1f2e,#13151d); border-left:1px solid var(--gold-deep);
+  transform:translateX(100%); transition:transform .32s cubic-bezier(.3,.9,.3,1); overflow-y:auto;
+  box-shadow:-30px 0 80px -30px #000}
+.drawer.on{transform:none}
+.drawer-in{padding:1.6rem clamp(1.2rem,3vw,1.9rem) 3rem}
+.drawer .x{position:absolute; top:1rem; right:1rem; background:none; border:1px solid var(--line);
+  color:var(--muted); border-radius:50%; width:34px; height:34px; cursor:pointer; font-size:1.1rem; transition:.16s}
+.drawer .x:hover{color:var(--ivory); border-color:var(--gold)}
+.dr-yr{font-family:var(--f-ui); font-size:.66rem; letter-spacing:.2em; text-transform:uppercase; color:var(--gold)}
+.dr-au{font-family:var(--f-disp); font-size:1.9rem; line-height:1.05; margin:.25rem 0 .1rem}
+.dr-au .ar{display:block; font-size:1.5rem; color:var(--gold-deep); margin-top:.2rem}
+.dr-ti{font-family:var(--f-serif); font-style:italic; color:var(--ivory-dim); margin-bottom:1.2rem}
+.dr-meta{display:flex; flex-wrap:wrap; gap:.45rem; margin-bottom:1.4rem}
+.dr-sec{margin-top:1.5rem}
+.dr-sec h4{font-family:var(--f-ui); font-size:.64rem; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--muted); margin:0 0 .7rem; padding-bottom:.4rem; border-bottom:1px solid var(--line)}
+.fp{display:flex; flex-direction:column; gap:.3rem}
+.fp .bar-row .bl{width:140px}
+.sample{font-family:var(--f-ar); direction:rtl; font-size:1.25rem; line-height:2; color:var(--ivory-dim);
+  background:rgba(255,255,255,.02); border:1px solid var(--line); border-radius:10px; padding:1rem 1.1rem;
+  max-height:230px; overflow:hidden; position:relative}
+.sample::after{content:""; position:absolute; left:0;right:0;bottom:0; height:50px;
+  background:linear-gradient(transparent,#161925)}
+.neighbors{display:grid; gap:.4rem}
+.nb{display:flex; justify-content:space-between; align-items:center; padding:.45rem .7rem;
+  border:1px solid var(--line); border-radius:8px; cursor:pointer; font-size:.85rem; transition:.14s}
+.nb:hover{border-color:var(--gold-deep); background:rgba(216,166,87,.04)}
+.nb .w{font-family:var(--f-ui); font-size:.72rem; color:var(--gold)}
+
+/* footer */
+footer{border-top:1px solid var(--line); margin-top:3rem; background:linear-gradient(180deg,transparent,rgba(15,17,26,.7))}
+.foot-in{max-width:var(--maxw); margin:0 auto; padding:2.6rem clamp(1rem,3vw,2rem) 3rem;
+  display:grid; grid-template-columns:1.4fr 1fr; gap:2rem}
+@media(max-width:760px){.foot-in{grid-template-columns:1fr; gap:1.6rem}}
+.foot-thesis{font-family:var(--f-disp); font-size:1.15rem; line-height:1.4; color:var(--ivory-dim); max-width:40ch}
+.foot-thesis .ar{display:block; color:var(--gold-deep); font-size:1.3rem; margin-bottom:.6rem}
+.credits .lbl{margin-bottom:.8rem}
+.cred{margin-bottom:1rem}
+.cred .nm{font-family:var(--f-disp); font-size:1.05rem; color:var(--ivory)}
+.cred .rl{font-family:var(--f-ui); font-size:.74rem; color:var(--muted); line-height:1.45}
+.colophon{max-width:var(--maxw); margin:0 auto; padding:1.2rem clamp(1rem,3vw,2rem) 2.4rem;
+  border-top:1px solid var(--line-soft); font-family:var(--f-ui); font-size:.72rem; color:var(--faint);
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:1rem}
+.colophon a{color:var(--muted); text-decoration:none; border-bottom:1px solid var(--line)}
+
+.muted{color:var(--muted)} .small{font-size:.82rem} .nowrap{white-space:nowrap}
+.note{font-family:var(--f-ui); font-size:.74rem; color:var(--faint); margin-top:1rem; line-height:1.5}
+.spin{display:inline-block; width:18px;height:18px; border:2px solid var(--line); border-top-color:var(--gold);
+  border-radius:50%; animation:sp .7s linear infinite; vertical-align:middle}
+@keyframes sp{to{transform:rotate(360deg)}}
+.empty{text-align:center; padding:3rem 1rem; color:var(--muted); font-family:var(--f-ui); font-size:.85rem}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.001ms!important; transition-duration:.05ms!important; scroll-behavior:auto!important}
+}
+:focus-visible{outline:2px solid var(--gold-bright); outline-offset:2px; border-radius:4px}
+
+/* ---------- Arabic / RTL ---------- */
+#lang-ar{font-family:var(--f-ar); font-size:.98rem; line-height:1}
+[dir=rtl] .drawer{right:auto; left:0; border-left:0; border-right:1px solid var(--gold-deep);
+  transform:translateX(-100%); box-shadow:30px 0 80px -30px #000}
+[dir=rtl] .drawer.on{transform:none}
+[dir=rtl] .drawer .x{right:auto; left:1rem}
+[dir=rtl] .epi .zahir{border-right:0; border-left:1px solid var(--line)}
+@media(max-width:620px){[dir=rtl] .epi .zahir{border-left:0; border-bottom:1px solid var(--line)}}
+[dir=rtl] .matrix th.rowh{text-align:left; padding-right:.3rem; padding-left:.7rem}
+[dir=rtl] .work-row:hover{transform:translateX(-3px)}
+[dir=rtl] .conc{border-left:0; border-right:2px solid var(--gold-deep); padding:.5rem 1rem .5rem 0}
+[dir=rtl] .eyebrow::before{background:linear-gradient(270deg,var(--gold),transparent)}
+[dir=rtl] .lens-head .tt .ar{margin-left:0; margin-right:.4rem}
+/* Arabic body copy a touch larger & relaxed for legibility */
+[dir=rtl] .blurb,[dir=rtl] .epi p,[dir=rtl] .thesis{line-height:1.85}
+
+/* ---------- comparison lens ---------- */
+.cmp-pick{display:flex; align-items:center; gap:.8rem; flex-wrap:wrap; margin-bottom:1.3rem}
+.cmp-sel{display:flex; align-items:center; gap:.55rem; flex:1; min-width:240px}
+select.search.sel{font-family:var(--f-ui); font-size:.86rem; background:var(--ground-2); color:var(--ivory);
+  border:1px solid var(--line); border-radius:10px; padding:.55rem .8rem; width:100%; max-width:none;
+  -webkit-appearance:none; appearance:none; cursor:pointer; padding-right:2rem;
+  background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 18px) 1.05em,calc(100% - 13px) 1.05em; background-size:5px 5px,5px 5px; background-repeat:no-repeat}
+select.search.sel:focus{outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(216,166,87,.12)}
+.cmp-vs{font-family:var(--f-ar); color:var(--gold); font-size:1.4rem}
+.cmp-head{display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.1rem}
+@media(max-width:620px){.cmp-head{grid-template-columns:1fr}}
+.cmp-card{border:1px solid var(--line); border-left-width:3px; border-radius:12px; padding:.85rem 1rem;
+  background:linear-gradient(180deg,rgba(255,255,255,.015),transparent)}
+[dir=rtl] .cmp-card{border-left-width:1px; border-right-width:3px}
+.cmp-tag{font-family:var(--f-ui); font-size:.6rem; letter-spacing:.14em; text-transform:uppercase; margin-bottom:.35rem}
+.cmp-au{font-family:var(--f-disp); font-size:1.15rem; color:var(--ivory); line-height:1.1}
+.cmp-ti{font-family:var(--f-ui); font-size:.74rem; color:var(--muted); margin-top:.22rem}
+.cmp-sim{display:flex; align-items:center; gap:.9rem; flex-wrap:wrap; font-family:var(--f-ui); font-size:.76rem;
+  color:var(--ivory-dim); border:1px solid var(--line); border-radius:10px; padding:.55rem .85rem; margin-bottom:1.2rem;
+  background:rgba(216,166,87,.03)}
+.cmp-sim b{color:var(--gold-bright)} .cmp-simtxt{margin-inline-start:auto}
+.legend-mini{display:inline-flex; align-items:center; gap:.35rem; color:var(--muted)}
+.cb-key{width:12px; height:12px; border-radius:3px; display:inline-block}
+.cb-key.a{background:var(--gold)} .cb-key.b{background:var(--teal)}
+.cmp-list{display:flex; flex-direction:column; gap:.55rem}
+.cmp-row{display:grid; grid-template-columns:152px 1fr; gap:.8rem; align-items:center}
+@media(max-width:560px){.cmp-row{grid-template-columns:108px 1fr}}
+.cmp-k{font-family:var(--f-ui); font-size:.8rem; color:var(--ivory-dim); display:flex; align-items:center; gap:.45rem}
+.cmp-k .dot{width:9px; height:9px; border-radius:2px; flex:0 0 auto}
+.cmp-bars{display:flex; flex-direction:column; gap:3px}
+.cb{height:8px; background:rgba(255,255,255,.05); border-radius:3px; overflow:hidden}
+.cb span{display:block; height:100%; border-radius:3px}
+.cb.a span{background:linear-gradient(90deg,var(--gold-deep),var(--gold))}
+.cb.b span{background:linear-gradient(90deg,#54817a,var(--teal))}
+.chips-wrap{display:flex; flex-wrap:wrap; gap:.35rem}
+</style>
+</head>
+<body>
+<div id="app">
+
+<header class="bar">
+  <div class="bar-in">
+    <a class="brand" href="#" onclick="go('pano');return false">
+      <span class="mark">۝</span>
+      <span><b>Tefsîr Atlası</b><span data-i="brand_sub">Dijital Müfessirler Haritası</span></span>
+    </a>
+    <div class="bar-spacer"></div>
+    <div class="lang" role="group" aria-label="Dil / Language">
+      <button id="lang-tr" class="on" onclick="setLang('tr')">TR</button>
+      <button id="lang-en" onclick="setLang('en')">EN</button>
+      <button id="lang-ar" onclick="setLang('ar')">ع</button>
+    </div>
+  </div>
+</header>
+
+<nav class="lenses" aria-label="Mercekler">
+  <div class="lens-scroll" id="lensNav"></div>
+</nav>
+
+<main>
+  <!-- I. PANO ------------------------------------------------------------>
+  <section class="lens-panel on" id="lp-pano">
+    <div class="hero">
+      <div class="hero-grid">
+        <div>
+          <div class="eyebrow" data-i="hero_eyebrow">Dijital Beşerî Bilimler · OpenITI Külliyatı</div>
+          <h1 class="title"><span data-i="hero_t1">Tefsîr</span> <span class="l2" data-i="hero_t2">Atlası</span></h1>
+          <div class="title-ar ar">أطلس التفسير الرقميّ</div>
+          <p class="thesis" data-i="hero_thesis"></p>
+          <div class="hero-cta">
+            <a class="btn prim" href="#" onclick="go('harita');return false"><span class="rosette">۝</span> <span data-i="cta_map">Haritada keşfet</span></a>
+            <a class="btn" href="#" onclick="go('kulliyat');return false"><span data-i="cta_browse">Külliyatı tara</span></a>
+          </div>
+          <div class="hero-stats" id="heroStats"></div>
+        </div>
+        <div class="hero-fig" id="heroFig"></div>
+      </div>
+    </div>
+
+    <div class="epi" style="margin:2.6rem 0 2.2rem">
+      <div class="zahir"><h5 data-i="epi_z">Bu atlas ne ölçer</h5><p data-i="pano_epi_z"></p></div>
+      <div class="batin"><h5 data-i="epi_b">Ne ölçmez</h5><p data-i="pano_epi_b"></p></div>
+    </div>
+
+    <div class="pano-grid">
+      <div class="card span8"><h3><span class="rosette">۝</span> <span data-i="pano_centuries">Yüzyıllara göre dağılım (Hicrî)</span></h3><div id="panoCenturies"></div></div>
+      <div class="card span4"><h3><span class="rosette">۝</span> <span data-i="pano_lang">Dil</span></h3><div id="panoLang"></div>
+        <h3 style="margin-top:1.4rem"><span class="rosette">۝</span> <span data-i="pano_reach">Kapsam</span></h3><div id="panoReach"></div></div>
+      <div class="card span6"><h3><span class="rosette">۝</span> <span data-i="pano_trad">Mezhep / Ekol geleneği</span></h3><div id="panoTrad"></div></div>
+      <div class="card span6"><h3><span class="rosette">۝</span> <span data-i="pano_genre">Tefsir türü (yöntem)</span></h3><div id="panoGenre"></div></div>
+    </div>
+    <p class="note" data-i="pano_note"></p>
+  </section>
+
+  <!-- II. HARITA ---------------------------------------------------------->
+  <section class="lens-panel" id="lp-harita" data-lazy="harita"></section>
+  <!-- III. ZAMAN ---------------------------------------------------------->
+  <section class="lens-panel" id="lp-zaman" data-lazy="zaman"></section>
+  <!-- IV. EKOLLER --------------------------------------------------------->
+  <section class="lens-panel" id="lp-ekoller" data-lazy="ekoller"></section>
+  <!-- V. KAVRAMLAR -------------------------------------------------------->
+  <section class="lens-panel" id="lp-kavramlar" data-lazy="kavramlar"></section>
+  <!-- VI. KAVRAM AKIŞI ----------------------------------------------------->
+  <section class="lens-panel" id="lp-akis" data-lazy="akis"></section>
+  <!-- VII. MUKAYESE ------------------------------------------------------->
+  <section class="lens-panel" id="lp-mukayese" data-lazy="mukayese"></section>
+  <!-- VIII. KAVRAM UZAYI -------------------------------------------------->
+  <section class="lens-panel" id="lp-uzay" data-lazy="uzay"></section>
+  <!-- IX. KULLIYAT -------------------------------------------------------->
+  <section class="lens-panel" id="lp-kulliyat" data-lazy="kulliyat"></section>
+  <!-- X. METINLER ARASI --------------------------------------------------->
+  <section class="lens-panel" id="lp-metinler" data-lazy="metinler"></section>
+  <!-- XI. AKTARIM --------------------------------------------------------->
+  <section class="lens-panel" id="lp-aktarim" data-lazy="aktarim"></section>
+</main>
+
+<footer>
+  <div class="foot-in">
+    <div class="foot-thesis">
+      <span class="ar">يُحْصِي وَلَا يَحْكُمُ</span>
+      <span data-i="foot_thesis">Sayar; ama hüküm vermez. Bu atlas tefsir mirasının dış hatlarını — kimin, ne zaman, nerede, hangi gelenekte yazdığını — haritalandırır. Murâd-ı ilâhînin tayini ise metnin ve ehlinin uhdesindedir.</span>
+    </div>
+    <div class="credits">
+      <div class="lbl" data-i="foot_prep">Hazırlayanlar</div>
+      <div class="cred"><div class="nm">Dr. Öğr. Üyesi Hasan Sevim</div><div class="rl">Selçuk Üniversitesi · İlahiyat Fakültesi</div></div>
+      <div class="cred"><div class="nm">Dr. Öğr. Üyesi Ali Çetinkaya</div><div class="rl">Selçuk Üniversitesi · Teknoloji Fakültesi<br>Bilgisayar Mühendisliği</div></div>
+    </div>
+  </div>
+  <div class="colophon">
+    <span data-i="colophon_l"></span>
+    <span data-i="colophon_r">Veri: OpenITI mARkdown külliyatı · İstatistikler yerel olarak hesaplanır</span>
+  </div>
+</footer>
+</div>
+
+<div class="scrim" id="scrim" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer" aria-hidden="true"><button class="x" onclick="closeDrawer()" aria-label="Kapat">×</button><div class="drawer-in" id="drawerIn"></div></aside>
+<div class="tip" id="tip"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/minisearch/6.3.0/index.min.js"></script>
+<script>
+/*__DATA__*/
+</script>
+<script>
+/*__JS__*/
+</script>
+</body>
+</html>
